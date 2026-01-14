@@ -448,8 +448,8 @@
         // ===========================
         // SUPABASE CONFIGURATION
         // ===========================
-        const SUPABASE_URL = 'https://zmmkbiafghjpvguzbanh.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_QGQgRSp5AZgIiM5b0AR7Ew_bdg1Fhna';
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
 
         // Debug logging
         function logDebug(message, type = 'info') {
@@ -597,10 +597,15 @@
 
                 if (error) throw error;
 
-                events.push(data[0]);
                 logDebug('✅ Event created successfully!', 'success');
-                renderCalendar();
+                logDebug(`Event ID: ${data[0].id}`, 'info');
+                
+                // Close modal first
                 closeModal();
+                
+                // Reload all events from Supabase to refresh the calendar
+                await loadEvents();
+                
             } catch (error) {
                 logDebug(`❌ Create failed: ${error.message}`, 'error');
                 alert(`Failed to create event: ${error.message}\n\nCheck the debug panel for details.`);
