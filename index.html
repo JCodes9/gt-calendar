@@ -3,365 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work Calendar - Debug Version</title>
-    
-    <!-- Supabase JavaScript Client -->
+    <title>Work Calendar - Fixed</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            font-family: Arial, sans-serif;
             background: #f9fafb;
-            color: #1f2937;
             padding: 20px;
         }
-
-        .debug-panel {
-            background: #1f2937;
-            color: #10b981;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-family: monospace;
-            font-size: 0.875rem;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .debug-panel .error {
-            color: #ef4444;
-        }
-
-        .debug-panel .success {
-            color: #10b981;
-        }
-
-        .debug-panel .info {
-            color: #3b82f6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #111827;
-            margin-bottom: 30px;
-        }
-
-        .calendar-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin-bottom: 30px;
-        }
-
-        .calendar-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 30px;
-        }
-
-        .calendar-header h2 {
-            font-size: 1.75rem;
-            font-weight: 600;
-        }
-
-        .nav-button {
-            padding: 10px 20px;
-            background: #e5e7eb;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.2s;
-        }
-
-        .nav-button:hover {
-            background: #d1d5db;
-        }
-
-        .test-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .test-button {
-            padding: 10px 20px;
-            background: #10b981;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .test-button:hover {
-            background: #059669;
-        }
-
-        .view-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .view-button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            background: #e5e7eb;
-            color: #374151;
-            transition: all 0.2s;
-        }
-
-        .view-button.active {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
-            background: #e5e7eb;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .day-header {
-            background: #f3f4f6;
-            padding: 15px;
-            text-align: center;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .calendar-day {
-            background: white;
-            min-height: 120px;
-            padding: 10px;
-            cursor: pointer;
-            transition: background 0.2s;
-            position: relative;
-        }
-
-        .calendar-day:hover {
-            background: #f9fafb;
-        }
-
-        .calendar-day.other-month {
-            opacity: 0.5;
-        }
-
-        .day-number {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #111827;
-        }
-
-        .calendar-day.other-month .day-number {
-            color: #9ca3af;
-        }
-
-        .event-item {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            margin-top: 4px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .event-item:hover {
-            transform: scale(1.05);
-        }
-
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { font-size: 2.5rem; margin-bottom: 30px; color: #111; }
+        .debug { background: #1f2937; color: #10b981; padding: 20px; border-radius: 8px; margin-bottom: 20px; font-family: monospace; max-height: 200px; overflow-y: auto; }
+        .debug .error { color: #ef4444; }
+        .debug .success { color: #10b981; }
+        .calendar-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 30px; margin-bottom: 30px; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .nav-button { padding: 10px 20px; background: #e5e7eb; border: none; border-radius: 8px; cursor: pointer; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e5e7eb; border-radius: 8px; overflow: hidden; }
+        .day-header { background: #f3f4f6; padding: 15px; text-align: center; font-weight: 600; }
+        .calendar-day { background: white; min-height: 120px; padding: 10px; cursor: pointer; }
+        .calendar-day:hover { background: #f9fafb; }
+        .calendar-day.other-month { opacity: 0.5; }
+        .day-number { font-weight: 600; margin-bottom: 8px; }
+        .event-item { font-size: 0.75rem; padding: 4px 8px; margin-top: 4px; border-radius: 4px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .event-shift { background: #3b82f6; color: white; }
         .event-meeting { background: #8b5cf6; color: white; }
         .event-time-off { background: #ef4444; color: white; }
         .event-other { background: #6b7280; color: white; }
-
-        .legend {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 3px;
-        }
-
-        .legend-color.shift { background: #3b82f6; }
-        .legend-color.meeting { background: #8b5cf6; }
-        .legend-color.time-off { background: #ef4444; }
-        .legend-color.other { background: #6b7280; }
-
-        .legend-text {
-            font-size: 0.875rem;
-            color: #374151;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-            max-width: 500px;
-            width: 100%;
-            padding: 30px;
-        }
-
-        .modal-title {
-            font-size: 1.75rem;
-            font-weight: bold;
-            color: #111827;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 6px;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .form-textarea {
-            resize: vertical;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 30px;
-        }
-
-        .button {
-            flex: 1;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .button-cancel {
-            background: white;
-            color: #374151;
-            border: 1px solid #d1d5db;
-        }
-
-        .button-cancel:hover {
-            background: #f9fafb;
-        }
-
-        .button-primary {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .button-primary:hover {
-            background: #2563eb;
-        }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 2rem; }
-            .calendar-header { flex-direction: column; gap: 15px; }
-            .calendar-day { min-height: 80px; padding: 6px; }
-            .day-number { font-size: 0.875rem; }
-            .event-item { font-size: 0.625rem; padding: 2px 4px; }
-            .modal-content { padding: 20px; }
-            .legend { flex-wrap: wrap; gap: 15px; }
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal.show { display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; border-radius: 12px; max-width: 500px; width: 100%; padding: 30px; }
+        .modal-title { font-size: 1.75rem; font-weight: bold; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 6px; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; }
+        .form-textarea { resize: vertical; }
+        .button-group { display: flex; gap: 12px; margin-top: 30px; }
+        .button { flex: 1; padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; cursor: pointer; }
+        .button-cancel { background: white; color: #374151; border: 1px solid #d1d5db; }
+        .button-primary { background: #3b82f6; color: white; }
+        .button-primary:hover { background: #2563eb; }
+        .test-btn { padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; margin-right: 10px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Employee Work Calendar (Debug Mode)</h1>
-
-        <!-- Debug Panel -->
-        <div class="debug-panel" id="debugPanel">
-            <div class="info">🔍 Debug Console - Watch for errors here</div>
-        </div>
-
-        <!-- Test Buttons -->
-        <div class="test-buttons">
-            <button class="test-button" onclick="testConnection()">Test Supabase Connection</button>
-            <button class="test-button" onclick="testInsert()">Test Insert Event</button>
-            <button class="test-button" onclick="testRead()">Test Read Events</button>
-            <button class="test-button" onclick="testFormSubmit()">Test Form Submit</button>
-            <button class="test-button" onclick="clearDebug()">Clear Debug</button>
+        <h1>Employee Work Calendar</h1>
+        <div class="debug" id="debug"><div>🔍 Debug Console</div></div>
+        
+        <div style="margin-bottom: 20px;">
+            <button class="test-btn" onclick="testConnection()">Test Connection</button>
+            <button class="test-btn" onclick="testInsert()">Test Insert</button>
+            <button class="test-btn" onclick="window.log('Button test works!')">Test Logging</button>
         </div>
 
         <div class="calendar-card">
@@ -370,14 +64,7 @@
                 <h2 id="monthYear">Loading...</h2>
                 <button class="nav-button" onclick="changeMonth(1)">Next →</button>
             </div>
-
-            <div class="view-buttons">
-                <button class="view-button active">Month</button>
-                <button class="view-button">Week</button>
-                <button class="view-button">Day</button>
-            </div>
-
-            <div id="calendarGrid" class="calendar-grid">
+            <div id="calendar" class="calendar-grid">
                 <div class="day-header">Sun</div>
                 <div class="day-header">Mon</div>
                 <div class="day-header">Tue</div>
@@ -387,200 +74,176 @@
                 <div class="day-header">Sat</div>
             </div>
         </div>
-
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color shift"></div>
-                <span class="legend-text">Shift</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color meeting"></div>
-                <span class="legend-text">Meeting</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color time-off"></div>
-                <span class="legend-text">Time Off</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color other"></div>
-                <span class="legend-text">Other</span>
-            </div>
-        </div>
     </div>
 
-    <div id="eventModal" class="modal">
+    <div id="modal" class="modal">
         <div class="modal-content">
             <h2 class="modal-title">Create Event</h2>
-            <div>
-                <div class="form-group">
-                    <label class="form-label" for="eventTitle">Title *</label>
-                    <input type="text" id="eventTitle" class="form-input" placeholder="e.g., Morning Shift" required />
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="eventType">Type *</label>
-                    <select id="eventType" class="form-select">
-                        <option value="shift">Shift</option>
-                        <option value="meeting">Meeting</option>
-                        <option value="time-off">Time Off</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="eventStart">Start Time *</label>
-                    <input type="time" id="eventStart" class="form-input" value="09:00" required />
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="eventEnd">End Time *</label>
-                    <input type="time" id="eventEnd" class="form-input" value="17:00" required />
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="eventDescription">Description (optional)</label>
-                    <textarea id="eventDescription" class="form-textarea" rows="3" placeholder="Add notes or details..."></textarea>
-                </div>
-                <div class="button-group">
-                    <button type="button" class="button button-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="button" class="button button-primary" onclick="handleCreateEvent()">Create Event</button>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Title *</label>
+                <input type="text" id="title" class="form-input" placeholder="e.g., Morning Shift" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Type *</label>
+                <select id="type" class="form-select">
+                    <option value="shift">Shift</option>
+                    <option value="meeting">Meeting</option>
+                    <option value="time-off">Time Off</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Start Time *</label>
+                <input type="time" id="start" class="form-input" value="09:00" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">End Time *</label>
+                <input type="time" id="end" class="form-input" value="17:00" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea id="description" class="form-textarea" rows="3"></textarea>
+            </div>
+            <div class="button-group">
+                <button class="button button-cancel" onclick="closeModal()">Cancel</button>
+                <button class="button button-primary" id="createBtn">Create Event</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ===========================
-        // SUPABASE CONFIGURATION
-        // ===========================
+        // ==== CONFIG ====
         const SUPABASE_URL = 'https://zmmkbiafghjpvguzbanh.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_QGQgRSp5AZgIiM5b0AR7Ew_bdg1Fhna';
 
-        // Debug logging
-        function logDebug(message, type = 'info') {
-            const panel = document.getElementById('debugPanel');
-            const time = new Date().toLocaleTimeString();
-            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
-            panel.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
-            panel.scrollTop = panel.scrollHeight;
-            console.log(`[${type.toUpperCase()}]`, message);
-        }
-
-        function clearDebug() {
-            document.getElementById('debugPanel').innerHTML = '<div class="info">🔍 Debug Console - Watch for errors here</div>';
-        }
-
-        // Initialize Supabase
-        let supabaseClient;
-        try {
-            const { createClient } = supabase;
-            supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            logDebug('✅ Supabase client initialized', 'success');
-        } catch (error) {
-            logDebug(`❌ Failed to initialize Supabase: ${error.message}`, 'error');
-        }
-
-        // Test functions
-        async function testConnection() {
-            logDebug('Testing Supabase connection...');
-            try {
-                const { data, error } = await supabaseClient
-                    .from('calendar_events')
-                    .select('count');
-                
-                if (error) throw error;
-                logDebug('✅ Connection successful!', 'success');
-                logDebug(`📊 Table exists and is accessible`, 'success');
-            } catch (error) {
-                logDebug(`❌ Connection failed: ${error.message}`, 'error');
-                logDebug(`💡 Check: 1) Table name is 'calendar_events', 2) RLS policies allow SELECT`, 'info');
-            }
-        }
-
-        async function testInsert() {
-            logDebug('Testing INSERT operation...');
-            const testEvent = {
-                title: 'Test Event',
-                date: 15,
-                month: new Date().getMonth(),
-                year: new Date().getFullYear(),
-                type: 'shift',
-                start: '09:00',
-                end: '17:00',
-                description: 'This is a test event',
-                user_id: 'test-user'
-            };
-
-            logDebug(`📝 Attempting to insert: ${JSON.stringify(testEvent)}`);
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('calendar_events')
-                    .insert([testEvent])
-                    .select();
-
-                if (error) throw error;
-                logDebug('✅ INSERT successful!', 'success');
-                logDebug(`📊 Created event: ${JSON.stringify(data)}`, 'success');
-                await loadEvents();
-            } catch (error) {
-                logDebug(`❌ INSERT failed: ${error.message}`, 'error');
-                logDebug(`💡 Check RLS policies - they might be blocking INSERT`, 'info');
-                logDebug(`💡 Try running: ALTER TABLE calendar_events DISABLE ROW LEVEL SECURITY;`, 'info');
-            }
-        }
-
-        async function testRead() {
-            logDebug('Testing READ operation...');
-            try {
-                const { data, error } = await supabaseClient
-                    .from('calendar_events')
-                    .select('*')
-                    .limit(10);
-
-                if (error) throw error;
-                logDebug(`✅ READ successful! Found ${data.length} events`, 'success');
-                data.forEach((event, i) => {
-                    logDebug(`  ${i + 1}. ${event.title} on day ${event.date}`, 'info');
-                });
-            } catch (error) {
-                logDebug(`❌ READ failed: ${error.message}`, 'error');
-            }
-        }
-
-        function testFormSubmit() {
-            logDebug('Testing if createEvent function is accessible...', 'info');
-            if (typeof createEvent === 'function') {
-                logDebug('✅ createEvent function exists!', 'success');
-                logDebug('Try creating an event through the form now.', 'info');
-            } else {
-                logDebug('❌ createEvent function not found!', 'error');
-            }
-        }
-
-        // Wrapper function to handle button click
-        async function handleCreateEvent() {
-            logDebug('🔘 Create Event button clicked!', 'info');
-            
-            // Validate required fields
-            const title = document.getElementById('eventTitle').value;
-            if (!title || title.trim() === '') {
-                logDebug('❌ Title is required!', 'error');
-                alert('Please enter a title for the event');
-                return;
-            }
-            
-            logDebug('✅ Validation passed, calling createEvent...', 'info');
-            await createEvent();
-        }
-
-        // State
+        // ==== GLOBALS ====
+        let supabase;
         let events = [];
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
         let selectedDate = null;
 
-        // Load events
-        async function loadEvents() {
-            logDebug(`Loading events for ${currentMonth}/${currentYear}...`);
+        // ==== LOGGING ====
+        window.log = function(msg, type = 'info') {
+            const debug = document.getElementById('debug');
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            debug.innerHTML += `<div class="${color}">[${time}] ${msg}</div>`;
+            debug.scrollTop = debug.scrollHeight;
+            console.log(msg);
+        };
+
+        // ==== INIT ====
+        function init() {
+            log('🚀 Starting initialization...');
+            
             try {
-                const { data, error } = await supabaseClient
+                const { createClient } = supabase;
+                window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                log('✅ Supabase initialized', 'success');
+            } catch (error) {
+                log(`❌ Supabase init failed: ${error.message}`, 'error');
+                return;
+            }
+
+            // Attach button handler
+            const btn = document.getElementById('createBtn');
+            btn.addEventListener('click', function() {
+                log('🔘 Create button clicked!');
+                handleCreate();
+            });
+            log('✅ Button handler attached', 'success');
+
+            loadEvents();
+        }
+
+        // ==== TEST FUNCTIONS ====
+        async function testConnection() {
+            log('Testing connection...');
+            try {
+                const { data, error } = await window.supabase.from('calendar_events').select('count');
+                if (error) throw error;
+                log('✅ Connection successful!', 'success');
+            } catch (error) {
+                log(`❌ Connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testInsert() {
+            log('Testing insert...');
+            try {
+                const test = {
+                    title: 'Test Event',
+                    date: 15,
+                    month: currentMonth,
+                    year: currentYear,
+                    type: 'shift',
+                    start: '09:00',
+                    end: '17:00',
+                    description: 'Test',
+                    user_id: 'test'
+                };
+                const { data, error } = await window.supabase.from('calendar_events').insert([test]).select();
+                if (error) throw error;
+                log('✅ Insert successful!', 'success');
+                loadEvents();
+            } catch (error) {
+                log(`❌ Insert failed: ${error.message}`, 'error');
+            }
+        }
+
+        // ==== CREATE EVENT ====
+        async function handleCreate() {
+            log('📝 handleCreate called');
+            
+            const title = document.getElementById('title').value;
+            if (!title || title.trim() === '') {
+                log('❌ Title required', 'error');
+                alert('Please enter a title');
+                return;
+            }
+
+            log(`Creating event: "${title}" on day ${selectedDate}`);
+
+            const newEvent = {
+                title: title,
+                date: selectedDate,
+                month: currentMonth,
+                year: currentYear,
+                type: document.getElementById('type').value,
+                start: document.getElementById('start').value,
+                end: document.getElementById('end').value,
+                description: document.getElementById('description').value,
+                user_id: 'demo-user'
+            };
+
+            log(`Event data: ${JSON.stringify(newEvent)}`);
+
+            try {
+                const { data, error } = await window.supabase
+                    .from('calendar_events')
+                    .insert([newEvent])
+                    .select();
+
+                if (error) throw error;
+
+                log('✅ Event created!', 'success');
+                log(`ID: ${data[0].id}`);
+                
+                closeModal();
+                await loadEvents();
+                
+            } catch (error) {
+                log(`❌ Failed: ${error.message}`, 'error');
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // ==== LOAD EVENTS ====
+        async function loadEvents() {
+            log(`Loading events for ${currentMonth}/${currentYear}...`);
+            try {
+                const { data, error } = await window.supabase
                     .from('calendar_events')
                     .select('*')
                     .eq('month', currentMonth)
@@ -590,98 +253,34 @@
                 if (error) throw error;
 
                 events = data || [];
-                logDebug(`✅ Loaded ${events.length} events`, 'success');
+                log(`✅ Loaded ${events.length} events`, 'success');
                 renderCalendar();
             } catch (error) {
-                logDebug(`❌ Load failed: ${error.message}`, 'error');
+                log(`❌ Load failed: ${error.message}`, 'error');
                 renderCalendar();
             }
         }
 
-        // Create event
-        async function createEvent() {
-            logDebug('🎯 createEvent function called!', 'info');
-            logDebug('📝 Starting event creation...', 'info');
-            logDebug(`Selected date: ${selectedDate}`, 'info');
-            logDebug(`Current month: ${currentMonth}, year: ${currentYear}`, 'info');
-
-            const newEvent = {
-                title: document.getElementById('eventTitle').value,
-                date: selectedDate,
-                month: currentMonth,
-                year: currentYear,
-                type: document.getElementById('eventType').value,
-                start: document.getElementById('eventStart').value,
-                end: document.getElementById('eventEnd').value,
-                description: document.getElementById('eventDescription').value,
-                user_id: 'demo-user'
-            };
-
-            logDebug(`Event data: ${JSON.stringify(newEvent)}`, 'info');
-            logDebug(`Sending INSERT request to Supabase...`, 'info');
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('calendar_events')
-                    .insert([newEvent])
-                    .select();
-
-                if (error) {
-                    logDebug(`Supabase returned an error:`, 'error');
-                    logDebug(`Error details: ${JSON.stringify(error)}`, 'error');
-                    throw error;
-                }
-
-                logDebug('✅ Event created successfully in Supabase!', 'success');
-                logDebug(`Returned data: ${JSON.stringify(data)}`, 'success');
-                logDebug(`Event ID: ${data[0].id}`, 'info');
-                
-                // Close modal first
-                logDebug('Closing modal...', 'info');
-                closeModal();
-                
-                // Reload all events from Supabase to refresh the calendar
-                logDebug('Reloading all events from database...', 'info');
-                await loadEvents();
-                
-                logDebug('✅ Calendar refreshed!', 'success');
-                
-            } catch (error) {
-                logDebug(`❌ Create failed: ${error.message}`, 'error');
-                logDebug(`Full error: ${JSON.stringify(error)}`, 'error');
-                alert(`Failed to create event: ${error.message}\n\nCheck the debug panel for details.`);
-            }
-        }
-
-        // Delete event
+        // ==== DELETE EVENT ====
         async function deleteEvent(id) {
-            if (!confirm('Delete this event?')) return;
-
-            logDebug(`Deleting event ${id}...`);
-
+            if (!confirm('Delete event?')) return;
+            log(`Deleting ${id}...`);
             try {
-                const { error } = await supabaseClient
-                    .from('calendar_events')
-                    .delete()
-                    .eq('id', id);
-
+                const { error } = await window.supabase.from('calendar_events').delete().eq('id', id);
                 if (error) throw error;
-
-                events = events.filter(e => e.id !== id);
-                logDebug('✅ Event deleted successfully!', 'success');
-                renderCalendar();
+                log('✅ Deleted', 'success');
+                await loadEvents();
             } catch (error) {
-                logDebug(`❌ Delete failed: ${error.message}`, 'error');
-                alert(`Failed to delete event: ${error.message}`);
+                log(`❌ Delete failed: ${error.message}`, 'error');
             }
         }
 
-        // Render calendar
+        // ==== RENDER ====
         function renderCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            const headers = Array.from(grid.querySelectorAll('.day-header'));
-            grid.innerHTML = '';
-            headers.forEach(header => grid.appendChild(header));
+            const cal = document.getElementById('calendar');
+            const headers = Array.from(cal.querySelectorAll('.day-header'));
+            cal.innerHTML = '';
+            headers.forEach(h => cal.appendChild(h));
 
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -691,70 +290,64 @@
                 const day = document.createElement('div');
                 day.className = 'calendar-day other-month';
                 day.innerHTML = `<div class="day-number">${prevMonthDays - i}</div>`;
-                grid.appendChild(day);
+                cal.appendChild(day);
             }
 
             for (let i = 1; i <= daysInMonth; i++) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day';
                 day.onclick = () => openModal(i);
-
-                let dayHTML = `<div class="day-number">${i}</div>`;
-
+                let html = `<div class="day-number">${i}</div>`;
                 const dayEvents = events.filter(e => e.date === i);
                 dayEvents.forEach(event => {
-                    dayHTML += `<div class="event-item event-${event.type}" onclick="event.stopPropagation(); deleteEvent('${event.id}')">${event.title}</div>`;
+                    html += `<div class="event-item event-${event.type}" onclick="event.stopPropagation(); deleteEvent('${event.id}')">${event.title}</div>`;
                 });
-
-                day.innerHTML = dayHTML;
-                grid.appendChild(day);
+                day.innerHTML = html;
+                cal.appendChild(day);
             }
 
             const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
-            const remainingCells = totalCells - (firstDay + daysInMonth);
-            for (let i = 1; i <= remainingCells; i++) {
+            const remaining = totalCells - (firstDay + daysInMonth);
+            for (let i = 1; i <= remaining; i++) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day other-month';
                 day.innerHTML = `<div class="day-number">${i}</div>`;
-                grid.appendChild(day);
+                cal.appendChild(day);
             }
 
-            const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                          'July', 'August', 'September', 'October', 'November', 'December'];
+            const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
             document.getElementById('monthYear').textContent = `${months[currentMonth]} ${currentYear}`;
         }
 
+        // ==== NAVIGATION ====
         function changeMonth(delta) {
             currentMonth += delta;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            } else if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
             loadEvents();
         }
 
+        // ==== MODAL ====
         function openModal(date) {
+            log(`Opening modal for day ${date}`);
             selectedDate = date;
-            document.getElementById('eventModal').classList.add('active');
-            document.getElementById('eventTitle').focus();
+            document.getElementById('modal').classList.add('show');
+            document.getElementById('title').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('title').focus();
         }
 
         function closeModal() {
-            document.getElementById('eventModal').classList.remove('active');
-            document.getElementById('eventTitle').value = '';
-            document.getElementById('eventDescription').value = '';
+            log('Closing modal');
+            document.getElementById('modal').classList.remove('show');
         }
 
-        document.getElementById('eventModal').addEventListener('click', function(e) {
+        document.getElementById('modal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
 
-        // Initialize
-        logDebug('🚀 Initializing calendar...');
-        loadEvents();
+        // ==== START ====
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
