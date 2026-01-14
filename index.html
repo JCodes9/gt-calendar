@@ -360,6 +360,7 @@
             <button class="test-button" onclick="testConnection()">Test Supabase Connection</button>
             <button class="test-button" onclick="testInsert()">Test Insert Event</button>
             <button class="test-button" onclick="testRead()">Test Read Events</button>
+            <button class="test-button" onclick="testFormSubmit()">Test Form Submit</button>
             <button class="test-button" onclick="clearDebug()">Clear Debug</button>
         </div>
 
@@ -438,7 +439,7 @@
                 </div>
                 <div class="button-group">
                     <button type="button" class="button button-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="button button-primary">Create Event</button>
+                    <button type="submit" class="button button-primary" onclick="logDebug('🔘 Create Event button clicked!', 'info')">Create Event</button>
                 </div>
             </form>
         </div>
@@ -543,6 +544,16 @@
             }
         }
 
+        function testFormSubmit() {
+            logDebug('Testing if createEvent function is accessible...', 'info');
+            if (typeof createEvent === 'function') {
+                logDebug('✅ createEvent function exists!', 'success');
+                logDebug('Try creating an event through the form now.', 'info');
+            } else {
+                logDebug('❌ createEvent function not found!', 'error');
+            }
+        }
+
         // State
         let events = [];
         let currentMonth = new Date().getMonth();
@@ -573,7 +584,14 @@
 
         // Create event
         async function createEvent(e) {
-            e.preventDefault();
+            logDebug('🎯 createEvent function called!', 'info');
+            
+            if (e) {
+                e.preventDefault();
+                logDebug('✅ Form submission prevented (preventDefault called)', 'info');
+            } else {
+                logDebug('⚠️ No event object passed to createEvent', 'info');
+            }
             
             logDebug('📝 Form submitted - starting event creation...', 'info');
             logDebug(`Selected date: ${selectedDate}`, 'info');
