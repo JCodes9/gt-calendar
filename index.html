@@ -26,11 +26,35 @@
         .calendar-day:hover { background: #f9fafb; }
         .calendar-day.other-month { opacity: 0.5; }
         .day-number { font-weight: 600; margin-bottom: 8px; }
-        .event-item { font-size: 0.75rem; padding: 4px 8px; margin-top: 4px; border-radius: 4px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .event-shift { background: #3b82f6; color: white; }
-        .event-meeting { background: #8b5cf6; color: white; }
-        .event-time-off { background: #ef4444; color: white; }
-        .event-other { background: #6b7280; color: white; }
+        .event-item { font-size: 0.75rem; padding: 4px 8px; margin-top: 4px; border-radius: 4px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: relative; }
+        .event-item[data-description]:hover::after {
+            content: attr(data-description);
+            position: absolute;
+            left: 0;
+            top: 100%;
+            background: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: normal;
+            width: 200px;
+            z-index: 1000;
+            margin-top: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .event-vacation { background: #10b981; color: white; }
+        .event-personal { background: #fbbf24; color: #111; }
+        .event-unpaid { background: #ef4444; color: white; }
+        .event-pickup { background: #3b82f6; color: white; }
+        .legend { display: flex; gap: 30px; justify-content: center; margin-top: 30px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-color { width: 16px; height: 16px; border-radius: 3px; }
+        .legend-color.vacation { background: #10b981; }
+        .legend-color.personal { background: #fbbf24; }
+        .legend-color.unpaid { background: #ef4444; }
+        .legend-color.pickup { background: #3b82f6; }
+        .legend-text { font-size: 0.875rem; color: #374151; }
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
         .modal.show { display: flex; align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: white; border-radius: 12px; max-width: 500px; width: 100%; padding: 30px; }
@@ -44,7 +68,15 @@
         .button-cancel { background: white; color: #374151; border: 1px solid #d1d5db; }
         .button-primary { background: #3b82f6; color: white; }
         .button-primary:hover { background: #2563eb; }
+        .button-delete { background: #ef4444; color: white; }
+        .button-delete:hover { background: #dc2626; }
         .test-btn { padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; margin-right: 10px; margin-bottom: 10px; }
+        .detail-row { margin-bottom: 15px; }
+        .detail-label { font-weight: 600; color: #374151; font-size: 0.875rem; margin-bottom: 4px; }
+        .detail-value { color: #111827; font-size: 1rem; }
+        .modal-close { position: absolute; right: 20px; top: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280; }
+        .modal-close:hover { color: #111; }
+        .modal-content { position: relative; }
     </style>
 </head>
 <body>
@@ -74,22 +106,43 @@
                 <div class="day-header">Sat</div>
             </div>
         </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color vacation"></div>
+                <span class="legend-text">Vacation</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color personal"></div>
+                <span class="legend-text">Personal</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color unpaid"></div>
+                <span class="legend-text">Unpaid (Sick or Other)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color pickup"></div>
+                <span class="legend-text">Pick Up</span>
+            </div>
+        </div>
     </div>
 
     <div id="modal" class="modal">
         <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
             <h2 class="modal-title">Create Event</h2>
             <div class="form-group">
-                <label class="form-label">Title *</label>
-                <input type="text" id="title" class="form-input" placeholder="e.g., Morning Shift" />
+                <label class="form-label">Name *</label>
+                <input type="text" id="title" class="form-input" placeholder="e.g., John Smith" />
             </div>
             <div class="form-group">
                 <label class="form-label">Type *</label>
                 <select id="type" class="form-select">
-                    <option value="shift">Shift</option>
-                    <option value="meeting">Meeting</option>
-                    <option value="time-off">Time Off</option>
-                    <option value="other">Other</option>
+                    <option value="vacation">Vacation</option>
+                    <option value="personal">Personal</option>
+                    <option value="unpaid">Unpaid (Sick or Other)</option>
+                    <option value="pickup">Pick Up</option>
                 </select>
             </div>
             <div class="form-group">
@@ -102,11 +155,39 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Description</label>
-                <textarea id="description" class="form-textarea" rows="3"></textarea>
+                <textarea id="description" class="form-textarea" rows="3" placeholder="Additional notes..."></textarea>
             </div>
             <div class="button-group">
                 <button class="button button-cancel" onclick="closeModal()">Cancel</button>
                 <button class="button button-primary" id="createBtn">Create Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Event Details Modal -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeViewModal()">×</button>
+            <h2 class="modal-title">Event Details</h2>
+            <div class="detail-row">
+                <div class="detail-label">Name</div>
+                <div class="detail-value" id="viewName"></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Type</div>
+                <div class="detail-value" id="viewType"></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Time</div>
+                <div class="detail-value" id="viewTime"></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Description</div>
+                <div class="detail-value" id="viewDescription"></div>
+            </div>
+            <div class="button-group">
+                <button class="button button-cancel" onclick="closeViewModal()">Close</button>
+                <button class="button button-delete" id="deleteBtn">Delete Entry</button>
             </div>
         </div>
     </div>
@@ -190,10 +271,10 @@
                     date: 15,
                     month: currentMonth,
                     year: currentYear,
-                    type: 'shift',
+                    type: 'vacation',
                     start: '09:00',
                     end: '17:00',
-                    description: 'Test',
+                    description: 'This is a test event',
                     user_id: 'test'
                 };
                 const { data, error } = await supabaseClient.from('calendar_events').insert([test]).select();
@@ -276,12 +357,13 @@
 
         // ==== DELETE EVENT ====
         async function deleteEvent(id) {
-            if (!confirm('Delete event?')) return;
+            if (!confirm('Delete this event?')) return;
             log(`Deleting ${id}...`);
             try {
                 const { error } = await supabaseClient.from('calendar_events').delete().eq('id', id);
                 if (error) throw error;
                 log('✅ Deleted', 'success');
+                closeViewModal();
                 await loadEvents();
             } catch (error) {
                 log(`❌ Delete failed: ${error.message}`, 'error');
@@ -313,7 +395,9 @@
                 let html = `<div class="day-number">${i}</div>`;
                 const dayEvents = events.filter(e => e.date === i);
                 dayEvents.forEach(event => {
-                    html += `<div class="event-item event-${event.type}" onclick="event.stopPropagation(); deleteEvent('${event.id}')">${event.title}</div>`;
+                    const eventText = `${event.title} (${event.start}-${event.end})`;
+                    const description = event.description || 'No description';
+                    html += `<div class="event-item event-${event.type}" data-description="${description}" onclick="event.stopPropagation(); viewEventDetails('${event.id}')">${eventText}</div>`;
                 });
                 day.innerHTML = html;
                 cal.appendChild(day);
@@ -355,8 +439,44 @@
             document.getElementById('modal').classList.remove('show');
         }
 
+        function viewEventDetails(id) {
+            log(`Viewing event ${id}`);
+            const event = events.find(e => e.id === id);
+            if (!event) {
+                log('Event not found!', 'error');
+                return;
+            }
+
+            // Capitalize type for display
+            const typeMap = {
+                'vacation': 'Vacation',
+                'personal': 'Personal',
+                'unpaid': 'Unpaid (Sick or Other)',
+                'pickup': 'Pick Up'
+            };
+
+            document.getElementById('viewName').textContent = event.title;
+            document.getElementById('viewType').textContent = typeMap[event.type] || event.type;
+            document.getElementById('viewTime').textContent = `${event.start} - ${event.end}`;
+            document.getElementById('viewDescription').textContent = event.description || 'No description provided';
+
+            // Store event ID for delete button
+            document.getElementById('deleteBtn').onclick = () => deleteEvent(id);
+
+            document.getElementById('viewModal').classList.add('show');
+        }
+
+        function closeViewModal() {
+            log('Closing view modal');
+            document.getElementById('viewModal').classList.remove('show');
+        }
+
         document.getElementById('modal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
+        });
+
+        document.getElementById('viewModal').addEventListener('click', function(e) {
+            if (e.target === this) closeViewModal();
         });
 
         // ==== START ====
