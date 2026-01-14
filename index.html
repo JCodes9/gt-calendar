@@ -574,6 +574,10 @@
         // Create event
         async function createEvent(e) {
             e.preventDefault();
+            
+            logDebug('📝 Form submitted - starting event creation...', 'info');
+            logDebug(`Selected date: ${selectedDate}`, 'info');
+            logDebug(`Current month: ${currentMonth}, year: ${currentYear}`, 'info');
 
             const newEvent = {
                 title: document.getElementById('eventTitle').value,
@@ -587,7 +591,8 @@
                 user_id: 'demo-user'
             };
 
-            logDebug(`Creating event: ${newEvent.title} on day ${newEvent.date}`);
+            logDebug(`Event data: ${JSON.stringify(newEvent)}`, 'info');
+            logDebug(`Sending INSERT request to Supabase...`, 'info');
 
             try {
                 const { data, error } = await supabaseClient
@@ -595,19 +600,29 @@
                     .insert([newEvent])
                     .select();
 
-                if (error) throw error;
+                if (error) {
+                    logDebug(`Supabase returned an error:`, 'error');
+                    logDebug(`Error details: ${JSON.stringify(error)}`, 'error');
+                    throw error;
+                }
 
-                logDebug('✅ Event created successfully!', 'success');
+                logDebug('✅ Event created successfully in Supabase!', 'success');
+                logDebug(`Returned data: ${JSON.stringify(data)}`, 'success');
                 logDebug(`Event ID: ${data[0].id}`, 'info');
                 
                 // Close modal first
+                logDebug('Closing modal...', 'info');
                 closeModal();
                 
                 // Reload all events from Supabase to refresh the calendar
+                logDebug('Reloading all events from database...', 'info');
                 await loadEvents();
+                
+                logDebug('✅ Calendar refreshed!', 'success');
                 
             } catch (error) {
                 logDebug(`❌ Create failed: ${error.message}`, 'error');
+                logDebug(`Full error: ${JSON.stringify(error)}`, 'error');
                 alert(`Failed to create event: ${error.message}\n\nCheck the debug panel for details.`);
             }
         }
