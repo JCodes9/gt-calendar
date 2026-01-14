@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work Calendar with Supabase</title>
+    <title>Work Calendar - Debug Version</title>
     
     <!-- Supabase JavaScript Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -20,6 +20,30 @@
             background: #f9fafb;
             color: #1f2937;
             padding: 20px;
+        }
+
+        .debug-panel {
+            background: #1f2937;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .debug-panel .error {
+            color: #ef4444;
+        }
+
+        .debug-panel .success {
+            color: #10b981;
+        }
+
+        .debug-panel .info {
+            color: #3b82f6;
         }
 
         .container {
@@ -66,6 +90,26 @@
 
         .nav-button:hover {
             background: #d1d5db;
+        }
+
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .test-button {
+            padding: 10px 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .test-button:hover {
+            background: #059669;
         }
 
         .view-buttons {
@@ -291,12 +335,6 @@
             background: #2563eb;
         }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #6b7280;
-        }
-
         @media (max-width: 768px) {
             h1 { font-size: 2rem; }
             .calendar-header { flex-direction: column; gap: 15px; }
@@ -310,7 +348,20 @@
 </head>
 <body>
     <div class="container">
-        <h1>Employee Work Calendar</h1>
+        <h1>Employee Work Calendar (Debug Mode)</h1>
+
+        <!-- Debug Panel -->
+        <div class="debug-panel" id="debugPanel">
+            <div class="info">🔍 Debug Console - Watch for errors here</div>
+        </div>
+
+        <!-- Test Buttons -->
+        <div class="test-buttons">
+            <button class="test-button" onclick="testConnection()">Test Supabase Connection</button>
+            <button class="test-button" onclick="testInsert()">Test Insert Event</button>
+            <button class="test-button" onclick="testRead()">Test Read Events</button>
+            <button class="test-button" onclick="clearDebug()">Clear Debug</button>
+        </div>
 
         <div class="calendar-card">
             <div class="calendar-header">
@@ -333,7 +384,6 @@
                 <div class="day-header">Thu</div>
                 <div class="day-header">Fri</div>
                 <div class="day-header">Sat</div>
-                <div class="loading">Loading calendar...</div>
             </div>
         </div>
 
@@ -398,26 +448,110 @@
         // ===========================
         // SUPABASE CONFIGURATION
         // ===========================
-        // Replace these with your actual Supabase credentials
-        const SUPABASE_URL = 'https://zmmkbiafghjpvguzbanh.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_QGQgRSp5AZgIiM5b0AR7Ew_bdg1Fhna';
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
 
-        // Initialize Supabase client
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Debug logging
+        function logDebug(message, type = 'info') {
+            const panel = document.getElementById('debugPanel');
+            const time = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            panel.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+            panel.scrollTop = panel.scrollHeight;
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
 
-        // ===========================
-        // STATE
-        // ===========================
+        function clearDebug() {
+            document.getElementById('debugPanel').innerHTML = '<div class="info">🔍 Debug Console - Watch for errors here</div>';
+        }
+
+        // Initialize Supabase
+        let supabaseClient;
+        try {
+            const { createClient } = supabase;
+            supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            logDebug('✅ Supabase client initialized', 'success');
+        } catch (error) {
+            logDebug(`❌ Failed to initialize Supabase: ${error.message}`, 'error');
+        }
+
+        // Test functions
+        async function testConnection() {
+            logDebug('Testing Supabase connection...');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('calendar_events')
+                    .select('count');
+                
+                if (error) throw error;
+                logDebug('✅ Connection successful!', 'success');
+                logDebug(`📊 Table exists and is accessible`, 'success');
+            } catch (error) {
+                logDebug(`❌ Connection failed: ${error.message}`, 'error');
+                logDebug(`💡 Check: 1) Table name is 'calendar_events', 2) RLS policies allow SELECT`, 'info');
+            }
+        }
+
+        async function testInsert() {
+            logDebug('Testing INSERT operation...');
+            const testEvent = {
+                title: 'Test Event',
+                date: 15,
+                month: new Date().getMonth(),
+                year: new Date().getFullYear(),
+                type: 'shift',
+                start: '09:00',
+                end: '17:00',
+                description: 'This is a test event',
+                user_id: 'test-user'
+            };
+
+            logDebug(`📝 Attempting to insert: ${JSON.stringify(testEvent)}`);
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('calendar_events')
+                    .insert([testEvent])
+                    .select();
+
+                if (error) throw error;
+                logDebug('✅ INSERT successful!', 'success');
+                logDebug(`📊 Created event: ${JSON.stringify(data)}`, 'success');
+                await loadEvents();
+            } catch (error) {
+                logDebug(`❌ INSERT failed: ${error.message}`, 'error');
+                logDebug(`💡 Check RLS policies - they might be blocking INSERT`, 'info');
+                logDebug(`💡 Try running: ALTER TABLE calendar_events DISABLE ROW LEVEL SECURITY;`, 'info');
+            }
+        }
+
+        async function testRead() {
+            logDebug('Testing READ operation...');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('calendar_events')
+                    .select('*')
+                    .limit(10);
+
+                if (error) throw error;
+                logDebug(`✅ READ successful! Found ${data.length} events`, 'success');
+                data.forEach((event, i) => {
+                    logDebug(`  ${i + 1}. ${event.title} on day ${event.date}`, 'info');
+                });
+            } catch (error) {
+                logDebug(`❌ READ failed: ${error.message}`, 'error');
+            }
+        }
+
+        // State
         let events = [];
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
         let selectedDate = null;
 
-        // ===========================
-        // LOAD EVENTS FROM SUPABASE
-        // ===========================
+        // Load events
         async function loadEvents() {
+            logDebug(`Loading events for ${currentMonth}/${currentYear}...`);
             try {
                 const { data, error } = await supabaseClient
                     .from('calendar_events')
@@ -429,17 +563,15 @@
                 if (error) throw error;
 
                 events = data || [];
+                logDebug(`✅ Loaded ${events.length} events`, 'success');
                 renderCalendar();
             } catch (error) {
-                console.error('Error loading events:', error);
-                alert('Failed to load events. Check console for details.');
-                renderCalendar(); // Render empty calendar
+                logDebug(`❌ Load failed: ${error.message}`, 'error');
+                renderCalendar();
             }
         }
 
-        // ===========================
-        // CREATE EVENT IN SUPABASE
-        // ===========================
+        // Create event
         async function createEvent(e) {
             e.preventDefault();
 
@@ -452,8 +584,10 @@
                 start: document.getElementById('eventStart').value,
                 end: document.getElementById('eventEnd').value,
                 description: document.getElementById('eventDescription').value,
-                user_id: 'demo-user' // Replace with actual user ID from auth
+                user_id: 'demo-user'
             };
+
+            logDebug(`Creating event: ${newEvent.title} on day ${newEvent.date}`);
 
             try {
                 const { data, error } = await supabaseClient
@@ -464,19 +598,20 @@
                 if (error) throw error;
 
                 events.push(data[0]);
+                logDebug('✅ Event created successfully!', 'success');
                 renderCalendar();
                 closeModal();
             } catch (error) {
-                console.error('Error creating event:', error);
-                alert('Failed to create event. Check console for details.');
+                logDebug(`❌ Create failed: ${error.message}`, 'error');
+                alert(`Failed to create event: ${error.message}\n\nCheck the debug panel for details.`);
             }
         }
 
-        // ===========================
-        // DELETE EVENT FROM SUPABASE
-        // ===========================
+        // Delete event
         async function deleteEvent(id) {
             if (!confirm('Delete this event?')) return;
+
+            logDebug(`Deleting event ${id}...`);
 
             try {
                 const { error } = await supabaseClient
@@ -487,20 +622,17 @@
                 if (error) throw error;
 
                 events = events.filter(e => e.id !== id);
+                logDebug('✅ Event deleted successfully!', 'success');
                 renderCalendar();
             } catch (error) {
-                console.error('Error deleting event:', error);
-                alert('Failed to delete event. Check console for details.');
+                logDebug(`❌ Delete failed: ${error.message}`, 'error');
+                alert(`Failed to delete event: ${error.message}`);
             }
         }
 
-        // ===========================
-        // RENDER CALENDAR
-        // ===========================
+        // Render calendar
         function renderCalendar() {
             const grid = document.getElementById('calendarGrid');
-            
-            // Keep day headers
             const headers = Array.from(grid.querySelectorAll('.day-header'));
             grid.innerHTML = '';
             headers.forEach(header => grid.appendChild(header));
@@ -509,7 +641,6 @@
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
 
-            // Previous month days
             for (let i = firstDay - 1; i >= 0; i--) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day other-month';
@@ -517,7 +648,6 @@
                 grid.appendChild(day);
             }
 
-            // Current month days
             for (let i = 1; i <= daysInMonth; i++) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day';
@@ -525,7 +655,6 @@
 
                 let dayHTML = `<div class="day-number">${i}</div>`;
 
-                // Add events for this day
                 const dayEvents = events.filter(e => e.date === i);
                 dayEvents.forEach(event => {
                     dayHTML += `<div class="event-item event-${event.type}" onclick="event.stopPropagation(); deleteEvent('${event.id}')">${event.title}</div>`;
@@ -535,7 +664,6 @@
                 grid.appendChild(day);
             }
 
-            // Next month days
             const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
             const remainingCells = totalCells - (firstDay + daysInMonth);
             for (let i = 1; i <= remainingCells; i++) {
@@ -545,15 +673,11 @@
                 grid.appendChild(day);
             }
 
-            // Update month/year display
             const months = ['January', 'February', 'March', 'April', 'May', 'June',
                           'July', 'August', 'September', 'October', 'November', 'December'];
             document.getElementById('monthYear').textContent = `${months[currentMonth]} ${currentYear}`;
         }
 
-        // ===========================
-        // NAVIGATION
-        // ===========================
         function changeMonth(delta) {
             currentMonth += delta;
             if (currentMonth > 11) {
@@ -563,12 +687,9 @@
                 currentMonth = 11;
                 currentYear--;
             }
-            loadEvents(); // Reload events for new month
+            loadEvents();
         }
 
-        // ===========================
-        // MODAL CONTROLS
-        // ===========================
         function openModal(date) {
             selectedDate = date;
             document.getElementById('eventModal').classList.add('active');
@@ -581,14 +702,12 @@
             document.getElementById('eventDescription').value = '';
         }
 
-        // Close modal when clicking outside
         document.getElementById('eventModal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
 
-        // ===========================
-        // INITIALIZE
-        // ===========================
+        // Initialize
+        logDebug('🚀 Initializing calendar...');
         loadEvents();
     </script>
 </body>
