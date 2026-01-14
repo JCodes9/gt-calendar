@@ -411,7 +411,7 @@
     <div id="eventModal" class="modal">
         <div class="modal-content">
             <h2 class="modal-title">Create Event</h2>
-            <form onsubmit="createEvent(event)">
+            <div>
                 <div class="form-group">
                     <label class="form-label" for="eventTitle">Title *</label>
                     <input type="text" id="eventTitle" class="form-input" placeholder="e.g., Morning Shift" required />
@@ -439,9 +439,9 @@
                 </div>
                 <div class="button-group">
                     <button type="button" class="button button-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="button button-primary" onclick="logDebug('🔘 Create Event button clicked!', 'info')">Create Event</button>
+                    <button type="button" class="button button-primary" onclick="handleCreateEvent()">Create Event</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -554,6 +554,22 @@
             }
         }
 
+        // Wrapper function to handle button click
+        async function handleCreateEvent() {
+            logDebug('🔘 Create Event button clicked!', 'info');
+            
+            // Validate required fields
+            const title = document.getElementById('eventTitle').value;
+            if (!title || title.trim() === '') {
+                logDebug('❌ Title is required!', 'error');
+                alert('Please enter a title for the event');
+                return;
+            }
+            
+            logDebug('✅ Validation passed, calling createEvent...', 'info');
+            await createEvent();
+        }
+
         // State
         let events = [];
         let currentMonth = new Date().getMonth();
@@ -583,17 +599,9 @@
         }
 
         // Create event
-        async function createEvent(e) {
+        async function createEvent() {
             logDebug('🎯 createEvent function called!', 'info');
-            
-            if (e) {
-                e.preventDefault();
-                logDebug('✅ Form submission prevented (preventDefault called)', 'info');
-            } else {
-                logDebug('⚠️ No event object passed to createEvent', 'info');
-            }
-            
-            logDebug('📝 Form submitted - starting event creation...', 'info');
+            logDebug('📝 Starting event creation...', 'info');
             logDebug(`Selected date: ${selectedDate}`, 'info');
             logDebug(`Current month: ${currentMonth}, year: ${currentYear}`, 'info');
 
