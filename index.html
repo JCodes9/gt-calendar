@@ -117,7 +117,7 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_QGQgRSp5AZgIiM5b0AR7Ew_bdg1Fhna';
 
         // ==== GLOBALS ====
-        let supabase;
+        let supabaseClient;
         let events = [];
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
@@ -137,22 +137,35 @@
         function init() {
             log('🚀 Starting initialization...');
             
+            // Check if Supabase loaded
+            if (typeof supabase === 'undefined') {
+                log('❌ Supabase library not loaded from CDN!', 'error');
+                log('Check your internet connection or try refreshing', 'error');
+                renderCalendar(); // Render empty calendar anyway
+                return;
+            }
+            
             try {
                 const { createClient } = supabase;
-                window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 log('✅ Supabase initialized', 'success');
             } catch (error) {
                 log(`❌ Supabase init failed: ${error.message}`, 'error');
+                renderCalendar(); // Render empty calendar anyway
                 return;
             }
 
             // Attach button handler
             const btn = document.getElementById('createBtn');
-            btn.addEventListener('click', function() {
-                log('🔘 Create button clicked!');
-                handleCreate();
-            });
-            log('✅ Button handler attached', 'success');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    log('🔘 Create button clicked!');
+                    handleCreate();
+                });
+                log('✅ Button handler attached', 'success');
+            } else {
+                log('❌ Create button not found!', 'error');
+            }
 
             loadEvents();
         }
@@ -161,7 +174,7 @@
         async function testConnection() {
             log('Testing connection...');
             try {
-                const { data, error } = await window.supabase.from('calendar_events').select('count');
+                const { data, error } = await supabaseClient.from('calendar_events').select('count');
                 if (error) throw error;
                 log('✅ Connection successful!', 'success');
             } catch (error) {
@@ -183,7 +196,7 @@
                     description: 'Test',
                     user_id: 'test'
                 };
-                const { data, error } = await window.supabase.from('calendar_events').insert([test]).select();
+                const { data, error } = await supabaseClient.from('calendar_events').insert([test]).select();
                 if (error) throw error;
                 log('✅ Insert successful!', 'success');
                 loadEvents();
@@ -220,7 +233,7 @@
             log(`Event data: ${JSON.stringify(newEvent)}`);
 
             try {
-                const { data, error } = await window.supabase
+                const { data, error } = await supabaseClient
                     .from('calendar_events')
                     .insert([newEvent])
                     .select();
@@ -243,7 +256,7 @@
         async function loadEvents() {
             log(`Loading events for ${currentMonth}/${currentYear}...`);
             try {
-                const { data, error } = await window.supabase
+                const { data, error } = await supabaseClient
                     .from('calendar_events')
                     .select('*')
                     .eq('month', currentMonth)
@@ -266,7 +279,7 @@
             if (!confirm('Delete event?')) return;
             log(`Deleting ${id}...`);
             try {
-                const { error } = await window.supabase.from('calendar_events').delete().eq('id', id);
+                const { error } = await supabaseClient.from('calendar_events').delete().eq('id', id);
                 if (error) throw error;
                 log('✅ Deleted', 'success');
                 await loadEvents();
