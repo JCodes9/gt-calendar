@@ -26,7 +26,24 @@
         .calendar-day:hover { background: #f9fafb; }
         .calendar-day.other-month { opacity: 0.5; }
         .day-number { font-weight: 600; margin-bottom: 8px; }
-        .event-item { font-size: 0.75rem; padding: 4px 8px; margin-top: 4px; border-radius: 4px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: relative; }
+        .event-item { 
+            font-size: 0.75rem; 
+            padding: 6px 10px; 
+            margin-top: 4px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+            position: relative;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .event-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
         .event-item[data-description]:hover::after {
             content: attr(data-description);
             position: absolute;
@@ -47,14 +64,15 @@
         .event-personal { background: #fbbf24; color: #111; }
         .event-unpaid { background: #ef4444; color: white; }
         .event-pickup { background: #3b82f6; color: white; }
-        .legend { display: flex; gap: 30px; justify-content: center; margin-top: 30px; }
-        .legend-item { display: flex; align-items: center; gap: 8px; }
-        .legend-color { width: 16px; height: 16px; border-radius: 3px; }
-        .legend-color.vacation { background: #10b981; }
-        .legend-color.personal { background: #fbbf24; }
-        .legend-color.unpaid { background: #ef4444; }
-        .legend-color.pickup { background: #3b82f6; }
-        .legend-text { font-size: 0.875rem; color: #374151; }
+        .bottom-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+        .stats-box, .legend-box { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 20px; }
+        .box-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 15px; color: #111; }
+        .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #374151; font-weight: 500; }
+        .stat-value { color: #111; font-weight: 600; }
+        .export-btn { padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px; }
+        .export-btn:hover { background: #7c3aed; }
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
         .modal.show { display: flex; align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: white; border-radius: 12px; max-width: 500px; width: 100%; padding: 30px; }
@@ -88,6 +106,7 @@
             <button class="test-btn" onclick="testConnection()">Test Connection</button>
             <button class="test-btn" onclick="testInsert()">Test Insert</button>
             <button class="test-btn" onclick="window.log('Button test works!')">Test Logging</button>
+            <button class="export-btn" onclick="exportToCSV()">Export to CSV</button>
         </div>
 
         <div class="calendar-card">
@@ -107,23 +126,49 @@
             </div>
         </div>
 
-        <!-- Legend -->
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color vacation"></div>
-                <span class="legend-text">Vacation</span>
+        <!-- Statistics and Legend -->
+        <div class="bottom-section">
+            <div class="stats-box">
+                <h3 class="box-title">Monthly Statistics</h3>
+                <div class="stat-row">
+                    <span class="stat-label">Total Events</span>
+                    <span class="stat-value" id="statTotal">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Vacation</span>
+                    <span class="stat-value" id="statVacation">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Personal</span>
+                    <span class="stat-value" id="statPersonal">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Unpaid</span>
+                    <span class="stat-value" id="statUnpaid">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Pick Up</span>
+                    <span class="stat-value" id="statPickup">0</span>
+                </div>
             </div>
-            <div class="legend-item">
-                <div class="legend-color personal"></div>
-                <span class="legend-text">Personal</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color unpaid"></div>
-                <span class="legend-text">Unpaid (Sick or Other)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color pickup"></div>
-                <span class="legend-text">Pick Up</span>
+            <div class="legend-box">
+                <h3 class="box-title">Event Types</h3>
+                <div class="legend-item" style="margin-bottom: 12px;">
+                    <div class="legend-color vacation" style="width: 20px; height: 20px; border-radius: 4px;"></div>
+                    <span class="legend-text" style="font-size: 1rem;">Vacation</span>
+                </div>
+                <div class="legend-item" style="margin-bottom: 12px;">
+                    <div class="legend-color personal" style="width: 20px; height: 20px; border-radius: 4px;"></div>
+                    <span class="legend-text" style="font-size: 1rem;">Personal</span>
+                </div>
+                <div class="legend-item" style="margin-bottom: 12px;">
+                    <div class="legend-color unpaid" style="width: 20px; height: 20px; border-radius: 4px;"></div>
+                    <span class="legend-text" style="font-size: 1rem;">Unpaid</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color pickup" style="width: 20px; height: 20px; border-radius: 4px;"></div>
+                    <span class="legend-text" style="font-size: 1rem;">Pick Up</span>
+                </div>
             </div>
         </div>
     </div>
@@ -141,17 +186,35 @@
                 <select id="type" class="form-select">
                     <option value="vacation">Vacation</option>
                     <option value="personal">Personal</option>
-                    <option value="unpaid">Unpaid (Sick or Other)</option>
+                    <option value="unpaid">Unpaid</option>
                     <option value="pickup">Pick Up</option>
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Start Time *</label>
-                <input type="time" id="start" class="form-input" value="09:00" />
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="fullDay" onchange="toggleFullDay()" />
+                    <span class="form-label" style="margin: 0;">Full Day</span>
+                </label>
             </div>
-            <div class="form-group">
-                <label class="form-label">End Time *</label>
-                <input type="time" id="end" class="form-input" value="17:00" />
+            <div id="timeInputs">
+                <div class="form-group">
+                    <label class="form-label">Start Time *</label>
+                    <input type="time" id="start" class="form-input" value="09:00" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">End Time *</label>
+                    <input type="time" id="end" class="form-input" value="17:00" />
+                </div>
+            </div>
+            <div id="dateInputs" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">From Date *</label>
+                    <input type="date" id="startDate" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">To Date *</label>
+                    <input type="date" id="endDate" class="form-input" />
+                </div>
             </div>
             <div class="form-group">
                 <label class="form-label">Description</label>
@@ -169,25 +232,59 @@
         <div class="modal-content">
             <button class="modal-close" onclick="closeViewModal()">×</button>
             <h2 class="modal-title">Event Details</h2>
-            <div class="detail-row">
-                <div class="detail-label">Name</div>
-                <div class="detail-value" id="viewName"></div>
+            <div id="viewMode">
+                <div class="detail-row">
+                    <div class="detail-label">Name</div>
+                    <div class="detail-value" id="viewName"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Type</div>
+                    <div class="detail-value" id="viewType"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Time</div>
+                    <div class="detail-value" id="viewTime"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Description</div>
+                    <div class="detail-value" id="viewDescription"></div>
+                </div>
+                <div class="button-group">
+                    <button class="button button-cancel" onclick="closeViewModal()">Close</button>
+                    <button class="button button-primary" onclick="enableEdit()">Edit</button>
+                    <button class="button button-delete" id="deleteBtn">Delete Entry</button>
+                </div>
             </div>
-            <div class="detail-row">
-                <div class="detail-label">Type</div>
-                <div class="detail-value" id="viewType"></div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Time</div>
-                <div class="detail-value" id="viewTime"></div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Description</div>
-                <div class="detail-value" id="viewDescription"></div>
-            </div>
-            <div class="button-group">
-                <button class="button button-cancel" onclick="closeViewModal()">Close</button>
-                <button class="button button-delete" id="deleteBtn">Delete Entry</button>
+            <div id="editMode" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Name *</label>
+                    <input type="text" id="editTitle" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type *</label>
+                    <select id="editType" class="form-select">
+                        <option value="vacation">Vacation</option>
+                        <option value="personal">Personal</option>
+                        <option value="unpaid">Unpaid</option>
+                        <option value="pickup">Pick Up</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Start Time *</label>
+                    <input type="time" id="editStart" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">End Time *</label>
+                    <input type="time" id="editEnd" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="editDescription" class="form-textarea" rows="3"></textarea>
+                </div>
+                <div class="button-group">
+                    <button class="button button-cancel" onclick="cancelEdit()">Cancel</button>
+                    <button class="button button-primary" onclick="saveEdit()">Save Changes</button>
+                </div>
             </div>
         </div>
     </div>
@@ -203,6 +300,27 @@
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
         let selectedDate = null;
+        let currentEditingEventId = null;
+
+        // ==== TIME CONVERSION ====
+        function convertTo12Hour(time24) {
+            if (!time24) return '';
+            const [hours, minutes] = time24.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            return `${hour12}:${minutes} ${ampm}`;
+        }
+
+        function convertTo24Hour(time12) {
+            const match = time12.match(/(\d+):(\d+)\s*(AM|PM)/i);
+            if (!match) return time12;
+            let [_, hours, minutes, ampm] = match;
+            hours = parseInt(hours);
+            if (ampm.toUpperCase() === 'PM' && hours !== 12) hours += 12;
+            if (ampm.toUpperCase() === 'AM' && hours === 12) hours = 0;
+            return `${hours.toString().padStart(2, '0')}:${minutes}`;
+        }
 
         // ==== LOGGING ====
         window.log = function(msg, type = 'info') {
@@ -286,6 +404,74 @@
             }
         }
 
+        // ==== STATISTICS ====
+        function updateStatistics() {
+            const stats = {
+                total: events.length,
+                vacation: events.filter(e => e.type === 'vacation').length,
+                personal: events.filter(e => e.type === 'personal').length,
+                unpaid: events.filter(e => e.type === 'unpaid').length,
+                pickup: events.filter(e => e.type === 'pickup').length
+            };
+
+            document.getElementById('statTotal').textContent = stats.total;
+            document.getElementById('statVacation').textContent = stats.vacation;
+            document.getElementById('statPersonal').textContent = stats.personal;
+            document.getElementById('statUnpaid').textContent = stats.unpaid;
+            document.getElementById('statPickup').textContent = stats.pickup;
+        }
+
+        // ==== EXPORT ====
+        function exportToCSV() {
+            log('Exporting to CSV...');
+            if (events.length === 0) {
+                alert('No events to export for this month');
+                return;
+            }
+
+            const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            const monthName = months[currentMonth];
+
+            let csv = 'Name,Type,Date,Start Time,End Time,Description\n';
+            events.forEach(event => {
+                const row = [
+                    event.title,
+                    event.type,
+                    `${monthName} ${event.date}, ${currentYear}`,
+                    convertTo12Hour(event.start),
+                    convertTo12Hour(event.end),
+                    event.description || ''
+                ];
+                csv += row.map(field => `"${field}"`).join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `calendar-${monthName}-${currentYear}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            log('✅ Export complete!', 'success');
+        }
+
+        // ==== FULL DAY TOGGLE ====
+        function toggleFullDay() {
+            const isFullDay = document.getElementById('fullDay').checked;
+            document.getElementById('timeInputs').style.display = isFullDay ? 'none' : 'block';
+            document.getElementById('dateInputs').style.display = isFullDay ? 'block' : 'none';
+            
+            if (isFullDay) {
+                // Set default dates
+                const today = new Date(currentYear, currentMonth, selectedDate);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                document.getElementById('startDate').valueAsDate = today;
+                document.getElementById('endDate').valueAsDate = tomorrow;
+            }
+        }
+
         // ==== CREATE EVENT ====
         async function handleCreate() {
             log('📝 handleCreate called');
@@ -293,23 +479,64 @@
             const title = document.getElementById('title').value;
             if (!title || title.trim() === '') {
                 log('❌ Title required', 'error');
-                alert('Please enter a title');
+                alert('Please enter a name');
                 return;
             }
 
-            log(`Creating event: "${title}" on day ${selectedDate}`);
+            const isFullDay = document.getElementById('fullDay').checked;
+            let newEvent;
 
-            const newEvent = {
-                title: title,
-                date: selectedDate,
-                month: currentMonth,
-                year: currentYear,
-                type: document.getElementById('type').value,
-                start: document.getElementById('start').value,
-                end: document.getElementById('end').value,
-                description: document.getElementById('description').value,
-                user_id: 'demo-user'
-            };
+            if (isFullDay) {
+                // Full day event with date range
+                const startDate = document.getElementById('startDate').valueAsDate;
+                const endDate = document.getElementById('endDate').valueAsDate;
+
+                if (!startDate || !endDate) {
+                    alert('Please select both start and end dates');
+                    return;
+                }
+
+                if (endDate < startDate) {
+                    alert('End date must be after start date');
+                    return;
+                }
+
+                newEvent = {
+                    title: title,
+                    type: document.getElementById('type').value,
+                    description: document.getElementById('description').value,
+                    is_full_day: true,
+                    start_date: startDate.toISOString().split('T')[0],
+                    end_date: endDate.toISOString().split('T')[0],
+                    start: '00:00',
+                    end: '23:59',
+                    // Keep legacy fields for compatibility
+                    date: startDate.getDate(),
+                    month: startDate.getMonth(),
+                    year: startDate.getFullYear(),
+                    user_id: 'demo-user'
+                };
+
+                log(`Creating full-day event from ${newEvent.start_date} to ${newEvent.end_date}`);
+            } else {
+                // Regular time-based event
+                newEvent = {
+                    title: title,
+                    type: document.getElementById('type').value,
+                    start: document.getElementById('start').value,
+                    end: document.getElementById('end').value,
+                    description: document.getElementById('description').value,
+                    is_full_day: false,
+                    date: selectedDate,
+                    month: currentMonth,
+                    year: currentYear,
+                    start_date: new Date(currentYear, currentMonth, selectedDate).toISOString().split('T')[0],
+                    end_date: new Date(currentYear, currentMonth, selectedDate).toISOString().split('T')[0],
+                    user_id: 'demo-user'
+                };
+
+                log(`Creating event: "${title}" on day ${selectedDate}`);
+            }
 
             log(`Event data: ${JSON.stringify(newEvent)}`);
 
@@ -337,21 +564,30 @@
         async function loadEvents() {
             log(`Loading events for ${currentMonth}/${currentYear}...`);
             try {
+                // Calculate the first and last day of current month view
+                const firstDay = new Date(currentYear, currentMonth, 1);
+                const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                
+                const startDateStr = firstDay.toISOString().split('T')[0];
+                const endDateStr = lastDay.toISOString().split('T')[0];
+
+                // Get events that overlap with this month (including multi-day events)
                 const { data, error } = await supabaseClient
                     .from('calendar_events')
                     .select('*')
-                    .eq('month', currentMonth)
-                    .eq('year', currentYear)
-                    .order('date', { ascending: true });
+                    .or(`and(start_date.lte.${endDateStr},end_date.gte.${startDateStr})`)
+                    .order('start_date', { ascending: true });
 
                 if (error) throw error;
 
                 events = data || [];
                 log(`✅ Loaded ${events.length} events`, 'success');
                 renderCalendar();
+                updateStatistics();
             } catch (error) {
                 log(`❌ Load failed: ${error.message}`, 'error');
                 renderCalendar();
+                updateStatistics();
             }
         }
 
@@ -381,6 +617,7 @@
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
 
+            // Previous month days
             for (let i = firstDay - 1; i >= 0; i--) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day other-month';
@@ -388,21 +625,57 @@
                 cal.appendChild(day);
             }
 
+            // Current month days
             for (let i = 1; i <= daysInMonth; i++) {
                 const day = document.createElement('div');
                 day.className = 'calendar-day';
                 day.onclick = () => openModal(i);
                 let html = `<div class="day-number">${i}</div>`;
-                const dayEvents = events.filter(e => e.date === i);
+                
+                // Get current date for this cell
+                const currentDate = new Date(currentYear, currentMonth, i);
+                const currentDateStr = currentDate.toISOString().split('T')[0];
+                
+                // Find all events that include this day
+                const dayEvents = events.filter(event => {
+                    if (!event.start_date || !event.end_date) return false;
+                    const eventStart = new Date(event.start_date + 'T00:00:00');
+                    const eventEnd = new Date(event.end_date + 'T00:00:00');
+                    return currentDate >= eventStart && currentDate <= eventEnd;
+                });
+                
                 dayEvents.forEach(event => {
-                    const eventText = `${event.title} (${event.start}-${event.end})`;
+                    const eventStart = new Date(event.start_date + 'T00:00:00');
+                    const eventEnd = new Date(event.end_date + 'T00:00:00');
+                    const isStart = currentDate.getTime() === eventStart.getTime();
+                    const isEnd = currentDate.getTime() === eventEnd.getTime();
+                    const isMultiDay = eventStart.getTime() !== eventEnd.getTime();
+                    
+                    let eventText;
+                    if (event.is_full_day) {
+                        // Full day events show just the name
+                        if (isStart || !isMultiDay) {
+                            eventText = event.title;
+                        } else {
+                            // Continuation of multi-day event
+                            eventText = '↔ ' + event.title;
+                        }
+                    } else {
+                        // Time-based events show name and time
+                        const startTime = convertTo12Hour(event.start);
+                        const endTime = convertTo12Hour(event.end);
+                        eventText = `${event.title} (${startTime}-${endTime})`;
+                    }
+                    
                     const description = event.description || 'No description';
                     html += `<div class="event-item event-${event.type}" data-description="${description}" onclick="event.stopPropagation(); viewEventDetails('${event.id}')">${eventText}</div>`;
                 });
+                
                 day.innerHTML = html;
                 cal.appendChild(day);
             }
 
+            // Next month days
             const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
             const remaining = totalCells - (firstDay + daysInMonth);
             for (let i = 1; i <= remaining; i++) {
@@ -431,6 +704,9 @@
             document.getElementById('modal').classList.add('show');
             document.getElementById('title').value = '';
             document.getElementById('description').value = '';
+            document.getElementById('fullDay').checked = false;
+            document.getElementById('timeInputs').style.display = 'block';
+            document.getElementById('dateInputs').style.display = 'none';
             document.getElementById('title').focus();
         }
 
@@ -447,17 +723,37 @@
                 return;
             }
 
+            currentEditingEventId = id;
+
             // Capitalize type for display
             const typeMap = {
                 'vacation': 'Vacation',
                 'personal': 'Personal',
-                'unpaid': 'Unpaid (Sick or Other)',
+                'unpaid': 'Unpaid',
                 'pickup': 'Pick Up'
             };
 
             document.getElementById('viewName').textContent = event.title;
             document.getElementById('viewType').textContent = typeMap[event.type] || event.type;
-            document.getElementById('viewTime').textContent = `${event.start} - ${event.end}`;
+            
+            // Display time/date based on event type
+            if (event.is_full_day) {
+                const startDate = new Date(event.start_date + 'T00:00:00');
+                const endDate = new Date(event.end_date + 'T00:00:00');
+                const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                
+                const startStr = `${months[startDate.getMonth()]} ${startDate.getDate()}, ${startDate.getFullYear()}`;
+                const endStr = `${months[endDate.getMonth()]} ${endDate.getDate()}, ${endDate.getFullYear()}`;
+                
+                if (event.start_date === event.end_date) {
+                    document.getElementById('viewTime').textContent = `Full Day - ${startStr}`;
+                } else {
+                    document.getElementById('viewTime').textContent = `Full Day - ${startStr} to ${endStr}`;
+                }
+            } else {
+                document.getElementById('viewTime').textContent = `${convertTo12Hour(event.start)} - ${convertTo12Hour(event.end)}`;
+            }
+            
             document.getElementById('viewDescription').textContent = event.description || 'No description provided';
 
             // Store event ID for delete button
@@ -469,6 +765,58 @@
         function closeViewModal() {
             log('Closing view modal');
             document.getElementById('viewModal').classList.remove('show');
+            document.getElementById('viewMode').style.display = 'block';
+            document.getElementById('editMode').style.display = 'none';
+            currentEditingEventId = null;
+        }
+
+        function enableEdit() {
+            const event = events.find(e => e.id === currentEditingEventId);
+            if (!event) return;
+
+            document.getElementById('editTitle').value = event.title;
+            document.getElementById('editType').value = event.type;
+            document.getElementById('editStart').value = event.start;
+            document.getElementById('editEnd').value = event.end;
+            document.getElementById('editDescription').value = event.description || '';
+
+            // Note: Full day event editing would require a more complex UI
+            // For now, all events can be edited with time-based inputs
+
+            document.getElementById('viewMode').style.display = 'none';
+            document.getElementById('editMode').style.display = 'block';
+        }
+
+        function cancelEdit() {
+            document.getElementById('viewMode').style.display = 'block';
+            document.getElementById('editMode').style.display = 'none';
+        }
+
+        async function saveEdit() {
+            log('Saving edits...');
+            const updatedEvent = {
+                title: document.getElementById('editTitle').value,
+                type: document.getElementById('editType').value,
+                start: document.getElementById('editStart').value,
+                end: document.getElementById('editEnd').value,
+                description: document.getElementById('editDescription').value
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from('calendar_events')
+                    .update(updatedEvent)
+                    .eq('id', currentEditingEventId);
+
+                if (error) throw error;
+
+                log('✅ Event updated!', 'success');
+                closeViewModal();
+                await loadEvents();
+            } catch (error) {
+                log(`❌ Update failed: ${error.message}`, 'error');
+                alert(`Error: ${error.message}`);
+            }
         }
 
         document.getElementById('modal').addEventListener('click', function(e) {
