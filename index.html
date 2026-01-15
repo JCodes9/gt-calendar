@@ -71,6 +71,13 @@
         .stat-row:last-child { border-bottom: none; }
         .stat-label { color: #374151; font-weight: 500; }
         .stat-value { color: #111; font-weight: 600; }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+        .legend-color.vacation { background: #10b981; }
+        .legend-color.personal { background: #fbbf24; }
+        .legend-color.unpaid { background: #ef4444; }
+        .legend-color.pickup { background: #3b82f6; }
+        .legend-text { font-size: 1rem; color: #374151; }
         .export-btn { padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px; }
         .export-btn:hover { background: #7c3aed; }
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
@@ -153,21 +160,21 @@
             </div>
             <div class="legend-box">
                 <h3 class="box-title">Event Types</h3>
-                <div class="legend-item" style="margin-bottom: 12px;">
-                    <div class="legend-color vacation" style="width: 20px; height: 20px; border-radius: 4px;"></div>
-                    <span class="legend-text" style="font-size: 1rem;">Vacation</span>
-                </div>
-                <div class="legend-item" style="margin-bottom: 12px;">
-                    <div class="legend-color personal" style="width: 20px; height: 20px; border-radius: 4px;"></div>
-                    <span class="legend-text" style="font-size: 1rem;">Personal</span>
-                </div>
-                <div class="legend-item" style="margin-bottom: 12px;">
-                    <div class="legend-color unpaid" style="width: 20px; height: 20px; border-radius: 4px;"></div>
-                    <span class="legend-text" style="font-size: 1rem;">Unpaid</span>
+                <div class="legend-item">
+                    <div class="legend-color vacation"></div>
+                    <span class="legend-text">Vacation</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color pickup" style="width: 20px; height: 20px; border-radius: 4px;"></div>
-                    <span class="legend-text" style="font-size: 1rem;">Pick Up</span>
+                    <div class="legend-color personal"></div>
+                    <span class="legend-text">Personal</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color unpaid"></div>
+                    <span class="legend-text">Unpaid</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color pickup"></div>
+                    <span class="legend-text">Pick Up</span>
                 </div>
             </div>
         </div>
